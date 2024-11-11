@@ -1,5 +1,7 @@
 <script lang="ts">
   import Cube from "$lib/components/Cube.svelte";
+  import Stone from "$lib/components/Stone.svelte";
+  import Stones from "$lib/components/Stones.svelte";
   import Camera from "./Camera.svelte";
   import Lights from "./Lights.svelte";
 </script>
@@ -25,3 +27,7 @@
     <Cube position={[-3 + slotNumber, 0, -1]} />
   {/if}
 {/each}
+
+<!-- <Stone position={[0, 0.5, 0]} /> -->
+
+<Stones initialPosition={[0, 0.5, 0]} targetPosition={[2, 0.5, 0]} />
