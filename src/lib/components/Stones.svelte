@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { interactivity } from "@threlte/extras";
+  interactivity();
   import { T } from "@threlte/core";
   import { tweened } from "svelte/motion";
   import { cubicOut } from "svelte/easing";
