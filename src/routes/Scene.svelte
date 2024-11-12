@@ -30,4 +30,4 @@
 
 <!-- <Stone position={[0, 0.5, 0]} /> -->
 
-<Stones initialPosition={[0, 0.5, 0]} targetPosition={[2, 0.5, 0]} />
+<Stones initialPosition={[0, 0, 1]} targetPosition={[0, 0.25, 1]} />
