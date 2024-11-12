@@ -29,18 +29,6 @@
 </script>
 
 <!-- Stone Component with Animated Position -->
-<T.Mesh
-  position={$position}
-  on:click={handleStoneClick}
-  on:pointerenter={onPointerEnter}
-  on:pointerleave={onPointerLeave}
-  on:pointerenter={() => {
-    color = "#FE3D00";
-  }}
-  on:pointerleave={() => {
-    color = "white";
-  }}
->
-  <Stone position={[0, 0, 0]} {color} />
-  <!-- The Stone component remains inside the mesh -->
-</T.Mesh>
+
+<Stone position={$position} {color} />
+<!-- The Stone component remains inside the mesh -->

@@ -11,11 +11,11 @@
   );
   materials[2].color.set(topFaceColor); // 2 = top face
 
-  const boxGeometry = new BoxGeometry(1, 1, 1);
+  const boxGeometry = new BoxGeometry(1, 0.25, 1);
 </script>
 
 <T.Mesh {position} material={materials}>
-  <T.BoxGeometry args={[1, 1, 1]} />
+  <T.BoxGeometry args={[1, 0.25, 1]} />
   <!-- <T.MeshBasicMaterial {color} /> -->
 </T.Mesh>
 
