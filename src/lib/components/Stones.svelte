@@ -1,10 +1,16 @@
 <script lang="ts">
-  import { interactivity } from "@threlte/extras";
-  interactivity();
-  import { T } from "@threlte/core";
-  import { tweened } from "svelte/motion";
+  import { forwardEventHandlers, T } from "@threlte/core";
+  import { interactivity, useCursor } from "@threlte/extras";
+
+  import { spring, tweened } from "svelte/motion";
   import { cubicOut } from "svelte/easing";
   import Stone from "$lib/components/Stone.svelte"; // Stone component for the token
+
+  interactivity();
+  let color = 0x000000;
+  const scale = spring(1);
+  const component = forwardEventHandlers();
+  const { onPointerEnter, onPointerLeave } = useCursor();
 
   export let initialPosition: [number, number, number] = [0, 0.5, 0]; // Initial position of the stone
   export let targetPosition: [number, number, number] = initialPosition; // Target position for animation
@@ -23,7 +29,18 @@
 </script>
 
 <!-- Stone Component with Animated Position -->
-<T.Mesh position={$position} on:click={handleStoneClick}>
-  <Stone position={[0, 0, 0]} />
+<T.Mesh
+  position={$position}
+  on:click={handleStoneClick}
+  on:pointerenter={onPointerEnter}
+  on:pointerleave={onPointerLeave}
+  on:pointerenter={() => {
+    color = "#FE3D00";
+  }}
+  on:pointerleave={() => {
+    color = "white";
+  }}
+>
+  <Stone position={[0, 0, 0]} {color} />
   <!-- The Stone component remains inside the mesh -->
 </T.Mesh>
