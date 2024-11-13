@@ -28,14 +28,4 @@
   {/if}
 {/each}
 
-<!-- <Stone position={[0, 0.5, 0]} /> -->
-
-<!-- TODO: change props to controll all of stones -->
-<Stones initialPosition={[0, 0, 0]} targetPosition={[0, 0.2, 1]} />
-
-{#each Array.from({ length: 6 }).map((_, i) => i) as slotNumber}
-  <Stones
-    initialPosition={[0, 0, 0]}
-    targetPosition={[-3 + slotNumber, -0.05, 2]}
-  />
-{/each}
+<Stones />

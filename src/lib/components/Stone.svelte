@@ -1,12 +1,12 @@
 <script lang="ts">
-  import { forwardEventHandlers, T } from "@threlte/core";
+  import { T } from "@threlte/core";
   import { CylinderGeometry } from "three";
   import { interactivity, useCursor } from "@threlte/extras";
-  import { spring } from "svelte/motion";
+  import { tweened } from "svelte/motion";
+  import { cubicOut } from "svelte/easing";
 
   interactivity();
 
-  export let position = [0, 0, 0]; // Position above the cube, assuming cube height is 1
   export let color = 0xff0000; // Default stone color
   export let outlineColor = 0x000000; // Default outline color
 
@@ -18,8 +18,16 @@
 
   const cylinderGeo = new CylinderGeometry(topRadius, bottomRadius, height, 32);
 
-  const scale = spring(1);
   const { onPointerEnter, onPointerLeave } = useCursor();
+
+  export let position: [number, number, number] = [0, 0.21, 0]; // Initial position of the stone
+
+  // let position = tweened(initialPosition, {
+  //   duration: 600,
+  //   easing: cubicOut,
+  // });
+  // // Watch the target position and animate when it changes
+  // $: position.set([1, 4, 0]);
 </script>
 
 <!-- Stone as a beveled cylinder -->
