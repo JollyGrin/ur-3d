@@ -1,20 +1,15 @@
 <script lang="ts">
-  import { tweened } from "svelte/motion";
-  import { cubicOut } from "svelte/easing";
   import Stone from "$lib/components/Stone.svelte"; // Stone component for the token
+  import { tokensStore } from "$lib/store/tokenStore"; // Stone component for the token
+  import type { Token } from "$lib/store/tokenStore"; // Stone component for the token
+  import { onDestroy } from "svelte";
 
-  let color = 0xff0000;
+  let tokens: Token[];
+  const unsubscribe = tokensStore.subscribe((value) => (tokens = value));
 
-  export let initialPosition: [number, number, number] = [1, 3, 0]; // Initial position of the stone
-  export let targetPosition: [number, number, number] = [1, 2, 0]; // Target position for animation
-
-  // Define a tweened store for the position with cubicOut easing
-  let position = tweened(initialPosition, { duration: 600, easing: cubicOut });
-  // Watch the target position and animate when it changes
-  $: position.set(targetPosition);
+  onDestroy(() => unsubscribe());
 </script>
 
-<!-- Stone Component with Animated Position -->
-
-<Stone position={$position} {color} />
-<!-- The Stone component remains inside the mesh -->
+{#each tokens as token, index}
+  <Stone position={token.position} color={token.color} tokenIndex={index} />
+{/each}
