@@ -5,8 +5,11 @@
   import {
     updateTokenPosition,
     moveForward,
-    BoardPositions,
   } from "$lib/store/tokenStore";
+  import {
+
+    BoardPositions,
+  } from '$lib/store/constants'
 
   interactivity();
 
