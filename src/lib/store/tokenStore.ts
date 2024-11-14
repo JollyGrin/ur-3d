@@ -45,6 +45,7 @@ const initialTokens: Token[] = [
     lane: "right" as const,
   })),
 ];
+const initPositions = initialTokens.map((token) => token.position);
 
 // Create a writable store to hold the tokens' data
 export const tokensStore = writable(initialTokens);
@@ -54,6 +55,19 @@ export function updateTokenPosition(index: number, newPosition: PositionType) {
     tokens[index].position = newPosition;
     return tokens;
   });
+}
+
+function findCollision(tokens: Token[], newPosition: PositionType) {
+  const collisions = tokens.filter((token) => {
+    const [x, y, z] = token.position;
+    return x === newPosition[0] && y === newPosition[1] && z === newPosition[2];
+  });
+
+  if (collisions.length > 0) {
+    const [token] = collisions;
+    const index = tokens.findIndex((e) => e.id === token.id);
+    return { ...token, index }; // the stone to kick back to shelf
+  }
 }
 
 export function moveForward(tokenIndex: number, amount = 1) {
@@ -67,7 +81,6 @@ export function moveForward(tokenIndex: number, amount = 1) {
      * */
     const [x, y, z] = token.position;
     const sideKey = token.lane;
-    console.log({ x, y, z });
 
     // if from starting shelf (off board -> onto board)
     if (Math.abs(z) === START_Z_POSITION) {
@@ -81,9 +94,22 @@ export function moveForward(tokenIndex: number, amount = 1) {
     // TODO: add star points which give you double turn
 
     // if on the side lane
-    const pos = findPositionInProgressionTrack(token.position, sideKey);
-    if (pos !== null) {
-      tokens[tokenIndex].position = ProgressionTrack[sideKey][pos + amount];
+    const progressionIndex = findPositionInProgressionTrack(
+      token.position,
+      sideKey,
+    );
+    if (progressionIndex !== null) {
+      const newPosition = ProgressionTrack[sideKey][progressionIndex + amount];
+      const collisionStone = findCollision(tokens, newPosition);
+      console.log({ collisionStone });
+
+      console.log("init pos", initPositions[0]);
+      if (collisionStone) {
+        tokens[collisionStone.index].position =
+          initPositions[collisionStone.index];
+      }
+
+      tokens[tokenIndex].position = newPosition;
     }
 
     return tokens;
