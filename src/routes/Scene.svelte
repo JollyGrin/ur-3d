@@ -1,6 +1,5 @@
 <script lang="ts">
   import Cube from "$lib/components/Cube.svelte";
-  import Stone from "$lib/components/Stone.svelte";
   import Stones from "$lib/components/Stones.svelte";
   import Camera from "./Camera.svelte";
   import Lights from "./Lights.svelte";
