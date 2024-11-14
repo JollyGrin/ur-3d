@@ -2,14 +2,8 @@
   import { T } from "@threlte/core";
   import { CylinderGeometry } from "three";
   import { interactivity, useCursor } from "@threlte/extras";
-  import {
-    updateTokenPosition,
-    moveForward,
-  } from "$lib/store/tokenStore";
-  import {
-
-    BoardPositions,
-  } from '$lib/store/constants'
+  import { updateTokenPosition, moveForward } from "$lib/store/tokenStore";
+  import { BoardPositions } from "$lib/store/constants";
 
   interactivity();
 
@@ -30,8 +24,7 @@
   export let position: [number, number, number] = [0, 0.21, 0]; // Initial position of the stone
 
   function move() {
-    // updateTokenPosition(tokenIndex, BoardPositions.mid[0]);
-    moveForward(tokenIndex);
+    moveForward(tokenIndex, 1);
   }
 </script>
 
