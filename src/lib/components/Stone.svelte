@@ -2,8 +2,7 @@
   import { T } from "@threlte/core";
   import { CylinderGeometry } from "three";
   import { interactivity, useCursor } from "@threlte/extras";
-  import { updateTokenPosition, moveForward } from "$lib/store/tokenStore";
-  import { BoardPositions } from "$lib/store/constants";
+  import { moveForward } from "$lib/store/tokenStore";
 
   interactivity();
 
