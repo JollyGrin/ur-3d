@@ -42,27 +42,24 @@ export const BoardPositions = {
     .sort(sortSides),
 };
 
-const ProgressionTrackLeft = [
-  ...BoardPositions.left.slice(0, 4),
-  ...BoardPositions.mid,
-  ...BoardPositions.left.slice(4, 6).reverse(),
-];
-
-const ProgressionTrackRight = [
-  ...BoardPositions.right.slice(0, 4),
-  ...BoardPositions.mid,
-  ...BoardPositions.right.slice(4, 6).reverse(),
-];
+const ProgressionTrack = {
+  left: [
+    ...BoardPositions.left.slice(0, 4),
+    ...BoardPositions.mid,
+    ...BoardPositions.left.slice(4, 6).reverse(),
+  ],
+  right: [
+    ...BoardPositions.right.slice(0, 4),
+    ...BoardPositions.mid,
+    ...BoardPositions.right.slice(4, 6).reverse(),
+  ],
+};
 
 function findPositionInProgressionTrack(
   position: PositionType,
   progressionTrackKey: "right" | "left",
 ): number | null {
-  console.log({ position, progressionTrackKey });
-  let progressionTrack;
-  if (progressionTrackKey === "left") progressionTrack = ProgressionTrackLeft;
-  if (progressionTrackKey === "right") progressionTrack = ProgressionTrackRight;
-  if (!progressionTrack) return null;
+  let progressionTrack = ProgressionTrack[progressionTrackKey];
   const index = progressionTrack.findIndex(
     (pos) =>
       pos[0] === position[0] &&
@@ -101,8 +98,6 @@ export function updateTokenPosition(index: number, newPosition: PositionType) {
 export function moveForward(tokenIndex: number, amount = 1) {
   tokensStore.update((tokens) => {
     const token = tokens[tokenIndex];
-    console.log(tokens[tokenIndex].position);
-    console.log(BoardPositions.left);
 
     /**
      * x = progression
@@ -113,20 +108,21 @@ export function moveForward(tokenIndex: number, amount = 1) {
     const sideKey = token.lane;
     console.log({ x, y, z });
 
-    // if on the off shelf
+    // if from starting shelf (off board -> onto board)
     if (Math.abs(z) === START_Z_POSITION) {
       tokens[tokenIndex].position = BoardPositions[sideKey][0];
       return tokens;
     }
 
+    // TODO: if collision, knock off other stone
+    // except if [3,y,0] (above single lane)
+
+    // TODO: add star points which give you double turn
+
     // if on the side lane
     const pos = findPositionInProgressionTrack(token.position, sideKey);
-
     if (pos !== null) {
-      tokens[tokenIndex].position =
-        sideKey === "left"
-          ? ProgressionTrackLeft[pos + amount]
-          : ProgressionTrackRight[pos + amount];
+      tokens[tokenIndex].position = ProgressionTrack[sideKey][pos + amount];
     }
 
     return tokens;
