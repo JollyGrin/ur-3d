@@ -7,6 +7,11 @@ export type Token = {
   position: PositionType;
   id: string;
 };
+type BoardPositionsType = {
+  left: PositionType[];
+  mid: PositionType[];
+  right: PositionType[];
+};
 
 const BLUE = 0x0f91db;
 const RED = 0xdb0f35;
@@ -14,7 +19,7 @@ const RED = 0xdb0f35;
 // Sorts the left/right sides to have 0 be the start
 function sortSides(a?: PositionType, b?: PositionType): number {
   if (!a || !b) return 0;
-  if (a[0] <= 0) return b[0] - a[0];
+  if (a[0] <= 0) return b[0] - a[0]; // if before the gap, reverse sort
   if (a[0] > 3) return a[0] - b[0];
   return 0;
 }
@@ -40,6 +45,25 @@ export const BoardPositions = {
     })
     .sort(sortSides),
 };
+
+function findPosition(
+  position: PositionType,
+): { key: keyof BoardPositionsType; index: number } | null {
+  for (const key of Object.keys(
+    BoardPositions,
+  ) as (keyof BoardPositionsType)[]) {
+    const index = BoardPositions[key].findIndex(
+      (pos) =>
+        pos[0] === position[0] &&
+        pos[1] === position[1] &&
+        pos[2] === position[2],
+    );
+    if (index !== -1) {
+      return { key, index };
+    }
+  }
+  return null; // Return null if not found
+}
 
 // Initialize tokens: 7 blue and 7 red, each with default position [0, 0, 0]
 const initialTokens: Token[] = [
@@ -88,9 +112,12 @@ export function moveForward(tokenIndex: number, amount = 1) {
 
     // if on the side lane
     if (Math.abs(z) === 1) {
-      console.log("yyyyy", BoardPositions[sideKey][0 + amount]);
-      // TODO: find the existing board position key, so you can increment it. the logic for where it goes is already done
-      tokens[tokenIndex].position = BoardPositions[sideKey][0 + amount];
+      const pos = findPosition([x, y, z]);
+
+      if (pos !== null) {
+        tokens[tokenIndex].position =
+          BoardPositions[pos.key][pos.index + amount];
+      }
       return tokens;
     }
 
