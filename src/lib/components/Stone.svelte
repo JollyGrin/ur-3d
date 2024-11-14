@@ -5,6 +5,7 @@
   import { moveForward } from "$lib/store/tokenStore";
 
   interactivity();
+  const { onPointerEnter, onPointerLeave } = useCursor();
 
   export let tokenIndex = 0;
   export let color = 0xff0000; // Default stone color
@@ -17,8 +18,6 @@
   const rotation = [Math.PI, 0, 0];
 
   const cylinderGeo = new CylinderGeometry(topRadius, bottomRadius, height, 32);
-
-  const { onPointerEnter, onPointerLeave } = useCursor();
 
   export let position: [number, number, number] = [0, 0.21, 0]; // Initial position of the stone
 

@@ -1,4 +1,4 @@
-import { writable } from "svelte/store";
+import { get, writable } from "svelte/store";
 
 type Roll = [number, number, number, number];
 export type Player = {
@@ -52,4 +52,11 @@ export function updateRollDice(
     if (roll) store.players[player].roll = roll;
     return store;
   });
+}
+
+export function getDiceRoll(player: Players["activePlayer"]) {
+  return get(playerStore).players[player].roll?.reduce(
+    (acc, value) => acc + value,
+    0,
+  );
 }
