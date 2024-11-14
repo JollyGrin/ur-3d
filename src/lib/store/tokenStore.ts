@@ -46,24 +46,45 @@ export const BoardPositions = {
     .sort(sortSides),
 };
 
-function findPosition(
+const ProgressionTrackLeft = [
+  ...BoardPositions.left.slice(0, 4),
+  ...BoardPositions.mid,
+  ...BoardPositions.left.slice(4, 6),
+];
+
+console.log({ ProgressionTrackLeft });
+
+function findPositionInProgressionTrack(
   position: PositionType,
-): { key: keyof BoardPositionsType; index: number } | null {
-  for (const key of Object.keys(
-    BoardPositions,
-  ) as (keyof BoardPositionsType)[]) {
-    const index = BoardPositions[key].findIndex(
-      (pos) =>
-        pos[0] === position[0] &&
-        pos[1] === position[1] &&
-        pos[2] === position[2],
-    );
-    if (index !== -1) {
-      return { key, index };
-    }
-  }
-  return null; // Return null if not found
+  progressionTrack: PositionType[],
+): number | null {
+  const index = progressionTrack.findIndex(
+    (pos) =>
+      pos[0] === position[0] &&
+      pos[1] === position[1] &&
+      pos[2] === position[2],
+  );
+  return index !== -1 ? index : null;
 }
+
+// function findPosition(
+//   position: PositionType,
+// ): { key: keyof BoardPositionsType; index: number } | null {
+//   for (const key of Object.keys(
+//     BoardPositions,
+//   ) as (keyof BoardPositionsType)[]) {
+//     const index = BoardPositions[key].findIndex(
+//       (pos) =>
+//         pos[0] === position[0] &&
+//         pos[1] === position[1] &&
+//         pos[2] === position[2],
+//     );
+//     if (index !== -1) {
+//       return { key, index };
+//     }
+//   }
+//   return null; // Return null if not found
+// }
 
 // Initialize tokens: 7 blue and 7 red, each with default position [0, 0, 0]
 const initialTokens: Token[] = [
@@ -111,13 +132,21 @@ export function moveForward(tokenIndex: number, amount = 1) {
     }
 
     // if on the side lane
-    if (Math.abs(z) === 1) {
-      const pos = findPosition([x, y, z]);
+    if (Math.abs(z) !== START_Z_POSITION) {
+      const pos = findPositionInProgressionTrack(
+        [x, y, z],
+        ProgressionTrackLeft,
+      );
 
       if (pos !== null) {
-        tokens[tokenIndex].position =
-          BoardPositions[pos.key][pos.index + amount];
+        tokens[tokenIndex].position = ProgressionTrackLeft[pos + amount];
       }
+      // const pos = findPosition([x, y, z]);
+      // if (pos !== null) {
+      //   tokens[tokenIndex].position =
+      //     BoardPositions[pos.key][pos.index + amount];
+      // }
+
       return tokens;
     }
 
