@@ -45,13 +45,13 @@ export const BoardPositions = {
 const ProgressionTrackLeft = [
   ...BoardPositions.left.slice(0, 4),
   ...BoardPositions.mid,
-  ...BoardPositions.left.slice(4, 6).toReversed(),
+  ...BoardPositions.left.slice(4, 6).reverse(),
 ];
 
 const ProgressionTrackRight = [
   ...BoardPositions.right.slice(0, 4),
   ...BoardPositions.mid,
-  ...BoardPositions.right.slice(4, 6).toReversed(),
+  ...BoardPositions.right.slice(4, 6).reverse(),
 ];
 
 function findPositionInProgressionTrack(
