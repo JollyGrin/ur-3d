@@ -1,9 +1,19 @@
 import { writable } from "svelte/store";
-import { START_Z_POSITION } from "./constants";
+import {
+  BoardPositions,
+  isRosetta,
+  ProgressionTrack,
+  START_Z_POSITION,
+} from "./constants";
 
 type PositionType = [number, number, number];
 export type Token = {
   color: number;
+  /**
+   * x = progression
+   * y = height (0.21 is surface)
+   * z = lane: 2 = off, 1 = side, 0 = mid
+   * */
   position: PositionType;
   id: string;
   lane: "left" | "right";
@@ -12,57 +22,12 @@ export type Token = {
 const BLUE = 0x0f91db;
 const RED = 0xdb0f35;
 
-// Sorts the left/right sides to have 0 be the start
-function sortSides(a?: PositionType, b?: PositionType): number {
-  if (!a || !b) return 0;
-  if (a[0] <= 0) return b[0] - a[0]; // if before the gap, reverse sort
-  if (a[0] > 3) return a[0] - b[0];
-  return 0;
-}
-
-export const BoardPositions = {
-  left: Array.from({ length: 6 })
-    .map((_, index) => {
-      let mod = 0;
-      if (index > 3) mod = index + 2; // skips blank space
-      if (index <= 3) mod = index;
-      return [-3 + mod, 0.21, 1] as PositionType;
-    })
-    .sort(sortSides),
-  mid: Array.from({ length: 8 }).map(
-    (_, index) => [-3 + index, 0.21, 0] as PositionType,
-  ),
-  right: Array.from({ length: 6 })
-    .map((_, index) => {
-      let mod = 0;
-      if (index > 3) mod = index + 2; // skips blank space
-      if (index <= 3) mod = index;
-      return [-3 + mod, 0.21, -1] as PositionType;
-    })
-    .sort(sortSides),
-};
-
-const ProgressionTrackLeft = [
-  ...BoardPositions.left.slice(0, 4),
-  ...BoardPositions.mid,
-  ...BoardPositions.left.slice(4, 6).reverse(),
-];
-
-const ProgressionTrackRight = [
-  ...BoardPositions.right.slice(0, 4),
-  ...BoardPositions.mid,
-  ...BoardPositions.right.slice(4, 6).reverse(),
-];
-
+// returns index of position in ProgressionTrack
 function findPositionInProgressionTrack(
   position: PositionType,
   progressionTrackKey: "right" | "left",
 ): number | null {
-  console.log({ position, progressionTrackKey });
-  let progressionTrack;
-  if (progressionTrackKey === "left") progressionTrack = ProgressionTrackLeft;
-  if (progressionTrackKey === "right") progressionTrack = ProgressionTrackRight;
-  if (!progressionTrack) return null;
+  let progressionTrack = ProgressionTrack[progressionTrackKey];
   const index = progressionTrack.findIndex(
     (pos) =>
       pos[0] === position[0] &&
@@ -87,6 +52,7 @@ const initialTokens: Token[] = [
     lane: "right" as const,
   })),
 ];
+const initPositions = initialTokens.map((token) => token.position);
 
 // Create a writable store to hold the tokens' data
 export const tokensStore = writable(initialTokens);
@@ -98,36 +64,61 @@ export function updateTokenPosition(index: number, newPosition: PositionType) {
   });
 }
 
+/**
+ * Checks a new position against existing tokens to find a collision
+ * if collision exists, will return the token & index in tokens array
+ * @return undefined | Token & {index: number}
+ * */
+function findCollision(tokens: Token[], newPosition: PositionType) {
+  const collisions = tokens.filter((token) => {
+    const [x, y, z] = token.position;
+    return x === newPosition[0] && y === newPosition[1] && z === newPosition[2];
+  });
+
+  if (collisions.length > 0) {
+    const [token] = collisions;
+    const index = tokens.findIndex((e) => e.id === token.id);
+    return { ...token, index }; // the stone to kick back to shelf
+  }
+}
+
 export function moveForward(tokenIndex: number, amount = 1) {
   tokensStore.update((tokens) => {
     const token = tokens[tokenIndex];
-    console.log(tokens[tokenIndex].position);
-    console.log(BoardPositions.left);
+    const [_x, _y, z] = token.position;
 
-    /**
-     * x = progression
-     * y = height (0.21 is surface)
-     * z = lane: 2 = off, 1 = side, 0 = mid
-     * */
-    const [x, y, z] = token.position;
-    const sideKey = token.lane;
-    console.log({ x, y, z });
-
-    // if on the off shelf
+    // if from starting shelf (off board -> onto board)
     if (Math.abs(z) === START_Z_POSITION) {
-      tokens[tokenIndex].position = BoardPositions[sideKey][0];
+      tokens[tokenIndex].position = BoardPositions[token.lane][0];
       return tokens;
     }
 
-    // if on the side lane
-    const pos = findPositionInProgressionTrack(token.position, sideKey);
+    // TODO: add star points which give you double turn
 
-    if (pos !== null) {
-      tokens[tokenIndex].position =
-        sideKey === "left"
-          ? ProgressionTrackLeft[pos + amount]
-          : ProgressionTrackRight[pos + amount];
+    // returns current index in the ProgressionTrack
+    // with index, can increment forward without worrying about manual positions
+    const progressionIndex = findPositionInProgressionTrack(
+      token.position,
+      token.lane,
+    );
+    if (progressionIndex === null) return tokens;
+
+    // increment moves forward along the ProgressionTrack
+    const newPosition = ProgressionTrack[token.lane][progressionIndex + amount];
+
+    // check for collision at new position
+    const collisionStone = findCollision(tokens, newPosition);
+
+    // if collision stone is on Rosetta, do not move either stone
+    // if collision and NOT on Rosseta, move collision_stone to shelf and move forward
+    if (collisionStone && !isRosetta(collisionStone.position)) {
+      tokens[collisionStone.index].position =
+        initPositions[collisionStone.index];
+      tokens[tokenIndex].position = newPosition;
     }
+
+    // if no collision, move stone forward
+    if (!collisionStone) tokens[tokenIndex].position = newPosition;
 
     return tokens;
   });
