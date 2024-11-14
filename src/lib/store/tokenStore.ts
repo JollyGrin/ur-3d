@@ -6,11 +6,7 @@ export type Token = {
   color: number;
   position: PositionType;
   id: string;
-};
-type BoardPositionsType = {
-  left: PositionType[];
-  mid: PositionType[];
-  right: PositionType[];
+  lane: "left" | "right";
 };
 
 const BLUE = 0x0f91db;
@@ -49,15 +45,24 @@ export const BoardPositions = {
 const ProgressionTrackLeft = [
   ...BoardPositions.left.slice(0, 4),
   ...BoardPositions.mid,
-  ...BoardPositions.left.slice(4, 6),
+  ...BoardPositions.left.slice(4, 6).toReversed(),
 ];
 
-console.log({ ProgressionTrackLeft });
+const ProgressionTrackRight = [
+  ...BoardPositions.right.slice(0, 4),
+  ...BoardPositions.mid,
+  ...BoardPositions.right.slice(4, 6).toReversed(),
+];
 
 function findPositionInProgressionTrack(
   position: PositionType,
-  progressionTrack: PositionType[],
+  progressionTrackKey: "right" | "left",
 ): number | null {
+  console.log({ position, progressionTrackKey });
+  let progressionTrack;
+  if (progressionTrackKey === "left") progressionTrack = ProgressionTrackLeft;
+  if (progressionTrackKey === "right") progressionTrack = ProgressionTrackRight;
+  if (!progressionTrack) return null;
   const index = progressionTrack.findIndex(
     (pos) =>
       pos[0] === position[0] &&
@@ -67,36 +72,19 @@ function findPositionInProgressionTrack(
   return index !== -1 ? index : null;
 }
 
-// function findPosition(
-//   position: PositionType,
-// ): { key: keyof BoardPositionsType; index: number } | null {
-//   for (const key of Object.keys(
-//     BoardPositions,
-//   ) as (keyof BoardPositionsType)[]) {
-//     const index = BoardPositions[key].findIndex(
-//       (pos) =>
-//         pos[0] === position[0] &&
-//         pos[1] === position[1] &&
-//         pos[2] === position[2],
-//     );
-//     if (index !== -1) {
-//       return { key, index };
-//     }
-//   }
-//   return null; // Return null if not found
-// }
-
 // Initialize tokens: 7 blue and 7 red, each with default position [0, 0, 0]
 const initialTokens: Token[] = [
   ...Array.from({ length: 7 }).map((_, index) => ({
     color: BLUE,
     position: [-3 + index, -0.05, 2] as PositionType,
     id: `B${index}`,
+    lane: "left" as const,
   })),
   ...Array.from({ length: 7 }).map((_, index) => ({
     color: RED,
     position: [-3 + index, -0.05, -2] as PositionType,
     id: `R${index}`,
+    lane: "right" as const,
   })),
 ];
 
@@ -122,7 +110,7 @@ export function moveForward(tokenIndex: number, amount = 1) {
      * z = lane: 2 = off, 1 = side, 0 = mid
      * */
     const [x, y, z] = token.position;
-    const sideKey = z > 0 ? "left" : "right";
+    const sideKey = token.lane;
     console.log({ x, y, z });
 
     // if on the off shelf
@@ -132,22 +120,13 @@ export function moveForward(tokenIndex: number, amount = 1) {
     }
 
     // if on the side lane
-    if (Math.abs(z) !== START_Z_POSITION) {
-      const pos = findPositionInProgressionTrack(
-        [x, y, z],
-        ProgressionTrackLeft,
-      );
+    const pos = findPositionInProgressionTrack(token.position, sideKey);
 
-      if (pos !== null) {
-        tokens[tokenIndex].position = ProgressionTrackLeft[pos + amount];
-      }
-      // const pos = findPosition([x, y, z]);
-      // if (pos !== null) {
-      //   tokens[tokenIndex].position =
-      //     BoardPositions[pos.key][pos.index + amount];
-      // }
-
-      return tokens;
+    if (pos !== null) {
+      tokens[tokenIndex].position =
+        sideKey === "left"
+          ? ProgressionTrackLeft[pos + amount]
+          : ProgressionTrackRight[pos + amount];
     }
 
     return tokens;
