@@ -1,6 +1,7 @@
 import { writable } from "svelte/store";
 import {
   BoardPositions,
+  isFinalRosetta,
   isRosetta,
   ProgressionTrack,
   START_Z_POSITION,
@@ -83,15 +84,14 @@ function findCollision(tokens: Token[], newPosition: PositionType) {
 }
 
 export function moveForward(tokenIndex: number, amount = 0) {
-  console.log({rollAmount: amount})
   tokensStore.update((tokens) => {
     const token = tokens[tokenIndex];
     const [_x, _y, z] = token.position;
 
     // if from starting shelf (off board -> onto board)
     if (Math.abs(z) === START_Z_POSITION) {
-      // tokens[tokenIndex].position = BoardPositions[token.lane][0];
-      tokens[tokenIndex].position = ProgressionTrack[token.lane][amount -1];
+      if (amount === 0) return tokens;
+      tokens[tokenIndex].position = ProgressionTrack[token.lane][amount - 1];
       return tokens;
     }
 
@@ -105,8 +105,13 @@ export function moveForward(tokenIndex: number, amount = 0) {
     );
     if (progressionIndex === null) return tokens;
 
+    // if amount goes over last step, ignore movement
+    if (progressionIndex + amount > 14) return tokens;
+
     // increment moves forward along the ProgressionTrack
     const newPosition = ProgressionTrack[token.lane][progressionIndex + amount];
+
+    console.log({ progressionIndex });
 
     // check for collision at new position
     const collisionStone = findCollision(tokens, newPosition);
@@ -114,9 +119,18 @@ export function moveForward(tokenIndex: number, amount = 0) {
     // if collision stone is on Rosetta, do not move either stone
     // if collision and NOT on Rosseta, move collision_stone to shelf and move forward
     if (collisionStone && !isRosetta(collisionStone.position)) {
-      tokens[collisionStone.index].position =
-        initPositions[collisionStone.index];
-      tokens[tokenIndex].position = newPosition;
+      if (tokens[collisionStone.index].lane === tokens[tokenIndex].lane)
+        return tokens;
+
+      // if collision stone is finished, don't reset collision
+      // TODO: wont let me add 2 to success
+      if (tokens[collisionStone.index].position[0] === 5) {
+        tokens[tokenIndex].position = newPosition;
+      } else {
+        tokens[collisionStone.index].position =
+          initPositions[collisionStone.index];
+        tokens[tokenIndex].position = newPosition;
+      }
     }
 
     // if no collision, move stone forward

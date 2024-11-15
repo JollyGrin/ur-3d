@@ -38,8 +38,6 @@
   $: sum = roll !== null ? roll.reduce(sumArray, 0) : null;
 
   function move() {
-    console.log(players.activePlayer === player, sum !== null);
-    console.log(players.activePlayer, sum);
     if (players.activePlayer === player && sum !== null) {
       moveForward(tokenIndex, sum);
       updateRollDice(player, null);

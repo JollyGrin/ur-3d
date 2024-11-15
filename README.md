@@ -9,3 +9,7 @@ https://planetpixelemporium.com/earth8081.html
 - [ ] pass player
 - [ ] websocket
 
+
+// notes
+have collision setup, but i need to make sure it doesnt clear if the same team
+also on last step, i setup to require perfect roll, but it wont let me add more than 1 to success
