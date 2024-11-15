@@ -11,5 +11,10 @@
 </script>
 
 {#each tokens as token, index}
-  <Stone position={token.position} color={token.color} tokenIndex={index} />
+  <Stone
+    position={token.position}
+    color={token.color}
+    tokenIndex={index}
+    player={token.lane === "left" ? "p1" : "p2"}
+  />
 {/each}

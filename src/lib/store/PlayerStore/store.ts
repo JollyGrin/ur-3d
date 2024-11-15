@@ -36,7 +36,7 @@ export function updateActivePlayer(newActivePlayer?: Players["activePlayer"]) {
   });
 }
 
-const randomBinary = () => Math.round(Math.random());
+const randomBinary = () => Math.round(Math.random()) as 0 | 1;
 
 /**
  * Rolls dice for selected player
@@ -54,9 +54,19 @@ export function updateRollDice(
   });
 }
 
+export const sumArray = (acc: number, value: number) => acc + value;
+
 export function getDiceRoll(player: Players["activePlayer"]) {
-  return get(playerStore).players[player].roll?.reduce(
-    (acc, value) => acc + value,
-    0,
+  let roll: [number, number, number, number] | null = null;
+  playerStore.subscribe(
+    (e) => (roll = e.players[player].roll as [number, number, number, number]),
   );
+  if (roll !== null) {
+    console.log(roll);
+    const result = (roll as [number, number, number, number])?.reduce(
+      (acc, value) => acc + value,
+      0,
+    );
+    return result;
+  }
 }

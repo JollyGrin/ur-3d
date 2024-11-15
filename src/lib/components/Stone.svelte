@@ -3,10 +3,20 @@
   import { CylinderGeometry } from "three";
   import { interactivity, useCursor } from "@threlte/extras";
   import { moveForward } from "$lib/store/tokenStore";
+  import {
+    playerStore,
+    getDiceRoll,
+    type Players,
+    updateActivePlayer,
+    updateRollDice,
+    sumArray,
+  } from "$lib/store/PlayerStore/store";
+  import { onDestroy } from "svelte";
 
   interactivity();
   const { onPointerEnter, onPointerLeave } = useCursor();
 
+  export let player: "p1" | "p2" = "p1";
   export let tokenIndex = 0;
   export let color = 0xff0000; // Default stone color
   let initialColor = color;
@@ -21,8 +31,20 @@
 
   export let position: [number, number, number] = [0, 0.21, 0]; // Initial position of the stone
 
+  let players: Players;
+  const unsubscribe = playerStore.subscribe((value) => (players = value));
+  onDestroy(() => unsubscribe());
+  $: roll = players.players[player].roll;
+  $: sum = roll !== null ? roll.reduce(sumArray, 0) : null;
+
   function move() {
-    moveForward(tokenIndex, 1);
+    console.log(players.activePlayer === player, sum !== null);
+    console.log(players.activePlayer, sum);
+    if (players.activePlayer === player && sum !== null) {
+      moveForward(tokenIndex, sum);
+      updateRollDice(player, null);
+      updateActivePlayer();
+    }
   }
 </script>
 

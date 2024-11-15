@@ -82,14 +82,16 @@ function findCollision(tokens: Token[], newPosition: PositionType) {
   }
 }
 
-export function moveForward(tokenIndex: number, amount = 1) {
+export function moveForward(tokenIndex: number, amount = 0) {
+  console.log({rollAmount: amount})
   tokensStore.update((tokens) => {
     const token = tokens[tokenIndex];
     const [_x, _y, z] = token.position;
 
     // if from starting shelf (off board -> onto board)
     if (Math.abs(z) === START_Z_POSITION) {
-      tokens[tokenIndex].position = BoardPositions[token.lane][0];
+      // tokens[tokenIndex].position = BoardPositions[token.lane][0];
+      tokens[tokenIndex].position = ProgressionTrack[token.lane][amount -1];
       return tokens;
     }
 
