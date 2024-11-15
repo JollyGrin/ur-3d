@@ -5,8 +5,9 @@ https://planetpixelemporium.com/earth8081.html
 
 
 # TODO
-- [ ] roll dice
-- [ ] pass player
+- [ ] keyboard click space to roll dice
+- [x] roll dice
+- [x] pass player
 - [ ] websocket
 
 
