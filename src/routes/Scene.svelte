@@ -1,5 +1,6 @@
 <script lang="ts">
   import Cube from "$lib/components/Cube.svelte";
+  import RollTray from "$lib/components/RollTray.svelte";
   import Stones from "$lib/components/Stones.svelte";
   import Camera from "./Camera.svelte";
   import Lights from "./Lights.svelte";
@@ -7,6 +8,9 @@
 
 <Lights />
 <Camera />
+
+<RollTray position={[1, -0.05, -1]} player="p2" />
+<RollTray position={[1, -0.05, 1]} player="p1" />
 
 <!-- Left Lane -->
 {#each Array.from({ length: 8 }).map((_, i) => i) as slotNumber}

@@ -25,6 +25,15 @@ export function isRosetta(position: PositionType) {
     );
   });
 }
+export function isFinalRosetta(position: PositionType, lane: "left" | "right") {
+  const match = position[0] === 3 && position[1] === STONE_Y;
+  if (!match) return false;
+  if (lane === "left") {
+    return position[2] === -1;
+  } else {
+    return position[2] === 1;
+  }
+}
 
 export const BoardPositions = {
   left: Array.from({ length: 6 })
@@ -53,10 +62,13 @@ export const ProgressionTrack = {
     ...BoardPositions.left.slice(0, 4),
     ...BoardPositions.mid,
     ...BoardPositions.left.slice(4, 6).reverse(),
+    [5, 0, 1] as PositionType,
   ],
   right: [
     ...BoardPositions.right.slice(0, 4),
     ...BoardPositions.mid,
     ...BoardPositions.right.slice(4, 6).reverse(),
+
+    [5, 0, -1] as PositionType,
   ],
 };
