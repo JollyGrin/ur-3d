@@ -39,9 +39,15 @@
 
   function move() {
     if (players.activePlayer === player && sum !== null) {
-      moveForward(tokenIndex, sum);
+      const { goAgain, illegalMove } = moveForward(tokenIndex, sum);
+
+      if (illegalMove) return;
+
       updateRollDice(player, null);
-      updateActivePlayer();
+
+      if (!goAgain) {
+        updateActivePlayer();
+      }
     }
   }
 </script>

@@ -84,16 +84,19 @@ function findCollision(tokens: Token[], newPosition: PositionType) {
 }
 
 export function moveForward(tokenIndex: number, amount = 0) {
+  let goAgain = false;
+  let illegalMove = false;
+
   tokensStore.update((tokens) => {
     const token = tokens[tokenIndex];
     const [_x, _y, z] = token.position;
 
-    // if from starting shelf (off board -> onto board)
-    if (Math.abs(z) === START_Z_POSITION) {
-      if (amount === 0) return tokens;
-      tokens[tokenIndex].position = ProgressionTrack[token.lane][amount - 1];
-      return tokens;
-    }
+    // // if from starting shelf (off board -> onto board)
+    // if (Math.abs(z) === START_Z_POSITION) {
+    //   if (amount === 0) return tokens;
+    //   tokens[tokenIndex].position = ProgressionTrack[token.lane][amount - 1];
+    //   return tokens;
+    // }
 
     // TODO: add star points which give you double turn
 
@@ -103,15 +106,23 @@ export function moveForward(tokenIndex: number, amount = 0) {
       token.position,
       token.lane,
     );
-    if (progressionIndex === null) return tokens;
-
+    // if (progressionIndex === null) return tokens;
+    if (progressionIndex === null) {
+      if (amount === 0) return tokens;
+      const newPosition = ProgressionTrack[token.lane][amount - 1];
+      const hasCollision = findCollision(tokens, newPosition);
+      if (hasCollision) {
+        illegalMove = true;
+        return tokens;
+      } // if collision on home territory,
+      tokens[tokenIndex].position = newPosition;
+      return tokens;
+    }
     // if amount goes over last step, ignore movement
     if (progressionIndex + amount > 14) return tokens;
 
     // increment moves forward along the ProgressionTrack
     const newPosition = ProgressionTrack[token.lane][progressionIndex + amount];
-
-    console.log({ progressionIndex });
 
     // check for collision at new position
     const collisionStone = findCollision(tokens, newPosition);
@@ -134,8 +145,12 @@ export function moveForward(tokenIndex: number, amount = 0) {
     }
 
     // if no collision, move stone forward
-    if (!collisionStone) tokens[tokenIndex].position = newPosition;
+    if (!collisionStone) {
+      if (isRosetta(newPosition)) goAgain = true;
+      tokens[tokenIndex].position = newPosition;
+    }
 
     return tokens;
   });
+  return { goAgain, illegalMove };
 }
