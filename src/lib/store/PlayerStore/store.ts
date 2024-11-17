@@ -3,6 +3,7 @@ import { get, writable } from "svelte/store";
 type Roll = [number, number, number, number];
 export type Player = {
   roll: Roll | null;
+  finished: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
 };
 export type Players = {
   activePlayer: "p1" | "p2";
@@ -14,14 +15,26 @@ const initPlayers: Players = {
   players: {
     p1: {
       roll: null,
+      finished: 0,
     },
     p2: {
       roll: null,
+      finished: 0,
     },
   },
 };
 
 export const playerStore = writable(initPlayers);
+
+/**
+ * Score a stone
+ * */
+export function incrementPlayerScore(player: Players["activePlayer"]) {
+  playerStore.update((store) => {
+    ++store.players[player].finished; // increment player score
+    return store;
+  });
+}
 
 /**
  * changes the active player

@@ -6,6 +6,7 @@ import {
   ProgressionTrack,
   START_Z_POSITION,
 } from "./constants";
+import { incrementPlayerScore } from "./PlayerStore/store";
 
 type PositionType = [number, number, number];
 export type Token = {
@@ -86,6 +87,7 @@ function findCollision(tokens: Token[], newPosition: PositionType) {
 export function moveForward(tokenIndex: number, amount = 0) {
   let goAgain = false;
   let illegalMove = false;
+  let scored: Token | null = null;
 
   tokensStore.update((tokens) => {
     if (amount === 0) return tokens;
@@ -109,7 +111,17 @@ export function moveForward(tokenIndex: number, amount = 0) {
       return tokens;
     }
     // if amount goes over last step, ignore movement
-    if (progressionIndex + amount > 14) return tokens;
+    if (progressionIndex + amount > 14) {
+      illegalMove = true; // cannot move more than 1 step past last square
+      return tokens;
+    }
+
+    // if exactly 14, score
+    if (progressionIndex + amount === 14) {
+      tokens[tokenIndex].position = [100, 0, 0];
+      incrementPlayerScore(token.lane === "left" ? "p1" : "p2");
+      return tokens;
+    }
 
     // increment moves forward along the ProgressionTrack
     const newPosition = ProgressionTrack[token.lane][progressionIndex + amount];
