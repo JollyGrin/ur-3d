@@ -46,7 +46,7 @@
       updateRollDice(player, null);
 
       if (!goAgain) {
-        // updateActivePlayer();
+        updateActivePlayer();
       }
     }
   }
