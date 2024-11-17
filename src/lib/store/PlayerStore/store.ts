@@ -1,8 +1,10 @@
 import { get, writable } from "svelte/store";
 
 type Roll = [number, number, number, number];
+type FinishedStoneAmount = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
 export type Player = {
   roll: Roll | null;
+  finished: FinishedStoneAmount;
 };
 export type Players = {
   activePlayer: "p1" | "p2";
@@ -14,14 +16,27 @@ const initPlayers: Players = {
   players: {
     p1: {
       roll: null,
+      finished: 0,
     },
     p2: {
       roll: null,
+      finished: 0,
     },
   },
 };
 
 export const playerStore = writable(initPlayers);
+
+/**
+ * Score a stone
+ * */
+export function incrementPlayerScore(player: Players["activePlayer"]) {
+  playerStore.update((store) => {
+    store.players[player].finished = (store.players[player].finished +
+      1) as FinishedStoneAmount; // increment player score
+    return store;
+  });
+}
 
 /**
  * changes the active player
@@ -62,7 +77,6 @@ export function getDiceRoll(player: Players["activePlayer"]) {
     (e) => (roll = e.players[player].roll as [number, number, number, number]),
   );
   if (roll !== null) {
-    console.log(roll);
     const result = (roll as [number, number, number, number])?.reduce(
       (acc, value) => acc + value,
       0,

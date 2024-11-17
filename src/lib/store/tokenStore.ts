@@ -6,6 +6,7 @@ import {
   ProgressionTrack,
   START_Z_POSITION,
 } from "./constants";
+import { incrementPlayerScore } from "./PlayerStore/store";
 
 type PositionType = [number, number, number];
 export type Token = {
@@ -84,18 +85,13 @@ function findCollision(tokens: Token[], newPosition: PositionType) {
 }
 
 export function moveForward(tokenIndex: number, amount = 0) {
+  let goAgain = false;
+  let illegalMove = false;
+  let scored: Token | null = null;
+
   tokensStore.update((tokens) => {
+    if (amount === 0) return tokens;
     const token = tokens[tokenIndex];
-    const [_x, _y, z] = token.position;
-
-    // if from starting shelf (off board -> onto board)
-    if (Math.abs(z) === START_Z_POSITION) {
-      if (amount === 0) return tokens;
-      tokens[tokenIndex].position = ProgressionTrack[token.lane][amount - 1];
-      return tokens;
-    }
-
-    // TODO: add star points which give you double turn
 
     // returns current index in the ProgressionTrack
     // with index, can increment forward without worrying about manual positions
@@ -103,18 +99,41 @@ export function moveForward(tokenIndex: number, amount = 0) {
       token.position,
       token.lane,
     );
-    if (progressionIndex === null) return tokens;
+    // if (progressionIndex === null) return tokens;
+    if (progressionIndex === null) {
+      const newPosition = ProgressionTrack[token.lane][amount - 1];
+      const hasCollision = findCollision(tokens, newPosition);
+      if (hasCollision) {
+        illegalMove = true; // if collision on home row, don't allow move
+        return tokens;
+      } // if collision on home territory,
+      tokens[tokenIndex].position = newPosition;
+      return tokens;
+    }
 
     // if amount goes over last step, ignore movement
-    if (progressionIndex + amount > 14) return tokens;
+    if (progressionIndex + amount > 14) {
+      illegalMove = true; // cannot move more than 1 step past last square
+      return tokens;
+    }
+
+    // if exactly 14, score
+    if (progressionIndex + amount === 14) {
+      tokens[tokenIndex].position = [100, 0, 0];
+      incrementPlayerScore(token.lane === "left" ? "p1" : "p2");
+      return tokens;
+    }
 
     // increment moves forward along the ProgressionTrack
     const newPosition = ProgressionTrack[token.lane][progressionIndex + amount];
 
-    console.log({ progressionIndex });
-
     // check for collision at new position
     const collisionStone = findCollision(tokens, newPosition);
+
+    if (collisionStone?.lane === token.lane) {
+      illegalMove = true; // if collision with your own stones, illegal move
+      return tokens;
+    }
 
     // if collision stone is on Rosetta, do not move either stone
     // if collision and NOT on Rosseta, move collision_stone to shelf and move forward
@@ -123,7 +142,8 @@ export function moveForward(tokenIndex: number, amount = 0) {
         return tokens;
 
       // if collision stone is finished, don't reset collision
-      // TODO: wont let me add 2 to success
+      // TODO: wont let me add 2 stones to finished
+      // if overflow, make move illegal
       if (tokens[collisionStone.index].position[0] === 5) {
         tokens[tokenIndex].position = newPosition;
       } else {
@@ -134,8 +154,12 @@ export function moveForward(tokenIndex: number, amount = 0) {
     }
 
     // if no collision, move stone forward
-    if (!collisionStone) tokens[tokenIndex].position = newPosition;
+    if (!collisionStone) {
+      if (isRosetta(newPosition)) goAgain = true;
+      tokens[tokenIndex].position = newPosition;
+    }
 
     return tokens;
   });
+  return { goAgain, illegalMove };
 }

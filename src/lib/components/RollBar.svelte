@@ -50,9 +50,15 @@
   }); // transparent if inactive
 
   function rollDice() {
-    if (isRollReady) updateRollDice(player);
+    if (isActive && isRollReady) updateRollDice(players.activePlayer);
+  }
+
+  function onKeyDown(e: KeyboardEvent) {
+    if (e.code === "Space") rollDice();
   }
 </script>
+
+<svelte:window on:keydown|preventDefault={onKeyDown} />
 
 <T.Mesh
   position={[-0.25, y, 0]}

@@ -2,12 +2,29 @@
   import Cube from "$lib/components/Cube.svelte";
   import RollTray from "$lib/components/RollTray.svelte";
   import Stones from "$lib/components/Stones.svelte";
+  import Text from "$lib/components/Text.svelte";
   import Camera from "./Camera.svelte";
   import Lights from "./Lights.svelte";
+  import { playerStore } from "$lib/store/PlayerStore/store";
+
+  $: players = $playerStore;
 </script>
+
+<svelte:window
+  on:keydown|preventDefault={(e) => {
+    console.log(e.code);
+    // DEBUGGER - adjust values here to test interactions
+    // e.code === "KeyA" && incrementPlayerScore("p1");
+  }}
+/>
 
 <Lights />
 <Camera />
+
+{#if players}
+  <Text position={[2.35, 0.1, 1]} text={`${players.players.p1.finished}/7`} />
+  <Text position={[2.35, 0.1, -1]} text={`${players.players.p2.finished}/7`} />
+{/if}
 
 <RollTray position={[1, -0.05, -1]} player="p2" />
 <RollTray position={[1, -0.05, 1]} player="p1" />

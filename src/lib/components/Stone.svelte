@@ -34,14 +34,20 @@
   let players: Players;
   const unsubscribe = playerStore.subscribe((value) => (players = value));
   onDestroy(() => unsubscribe());
-  $: roll = players.players[player].roll;
-  $: sum = roll !== null ? roll.reduce(sumArray, 0) : null;
+  $: roll = players.players[player].roll; // rolls 4 dice
+  $: sum = roll !== null ? roll.reduce(sumArray, 0) : null; // sums the values
 
   function move() {
     if (players.activePlayer === player && sum !== null) {
-      moveForward(tokenIndex, sum);
+      const { goAgain, illegalMove } = moveForward(tokenIndex, sum);
+
+      if (illegalMove) return;
+
       updateRollDice(player, null);
-      updateActivePlayer();
+
+      if (!goAgain) {
+        // updateActivePlayer();
+      }
     }
   }
 </script>
