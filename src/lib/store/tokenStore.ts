@@ -123,7 +123,7 @@ export function moveForward(tokenIndex: number, amount = 0) {
         return tokens;
 
       // if collision stone is finished, don't reset collision
-      // TODO: wont let me add 2 to success
+      // TODO: wont let me add 2 stones to finished
       if (tokens[collisionStone.index].position[0] === 5) {
         tokens[tokenIndex].position = newPosition;
       } else {
