@@ -50,7 +50,7 @@
   }); // transparent if inactive
 
   function rollDice() {
-    if (isRollReady) updateRollDice(players.activePlayer);
+    if (isActive && isRollReady) updateRollDice(players.activePlayer);
   }
 
   function onKeyDown(e: KeyboardEvent) {
