@@ -110,6 +110,7 @@ export function moveForward(tokenIndex: number, amount = 0) {
       tokens[tokenIndex].position = newPosition;
       return tokens;
     }
+
     // if amount goes over last step, ignore movement
     if (progressionIndex + amount > 14) {
       illegalMove = true; // cannot move more than 1 step past last square

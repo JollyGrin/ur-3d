@@ -1,28 +1,49 @@
 <script lang="ts">
   import { T } from "@threlte/core";
   import { MeshBasicMaterial } from "three";
-  import { FontLoader } from "three/examples/jsm/Addons.js";
-  import { TextGeometry } from "three/addons/geometries/TextGeometry.js";
+  import { FontLoader } from "three/examples/jsm/loaders/FontLoader.js";
   import { rotations } from "$lib/helpers/rotation_constants";
+  import { TextGeometry } from "three/addons/geometries/TextGeometry.js";
 
-  export let position = [0, 1, 0];
-  export let color = 0x8e44ad; // Default color
-  export let text = "";
+  // Props for the component
+  export let position: [number, number, number] = [0, 1, 0];
+  export let color: number = 0x8e44ad; // Default color
+  export let text: string = ""; // This is the reactive prop
 
-  // Load the font and create the text geometry
+  // Variables for font and geometry
+  let font: any; // Type 'any' since FontLoader doesn't have a strict type definition
+  let textGeometry: TextGeometry | null = null;
+
+  // Create a new font loader and load the font (only once)
   const fontLoader = new FontLoader();
-  let textGeometry: TextGeometry;
-
-  fontLoader.load("/font.json", (font) => {
-    textGeometry = new TextGeometry(text, {
-      font,
-      size: 0.2,
-      height: 0.05,
-      curveSegments: 12,
-    });
-    textGeometry.center(); // Optional, centers the text
+  fontLoader.load("/font.json", (loadedFont) => {
+    font = loadedFont;
+    createTextGeometry(); // Create the geometry when the font is loaded
   });
 
+  // Reactive block to create text geometry whenever `text` prop changes
+  $: if (font && text) {
+    createTextGeometry(); // Only create geometry when `text` changes
+  }
+
+  // Function to create the TextGeometry
+  function createTextGeometry(): void {
+    if (textGeometry) {
+      textGeometry.dispose(); // Dispose of the old geometry to free memory
+    }
+
+    if (font && text) {
+      textGeometry = new TextGeometry(text, {
+        font: font,
+        size: 0.2,
+        height: 0.05,
+        curveSegments: 12,
+      });
+      textGeometry.center(); // Optional, centers the text
+    }
+  }
+
+  // Material for the text
   const textMaterial = new MeshBasicMaterial({ color: color ?? 0xffffff });
 </script>
 

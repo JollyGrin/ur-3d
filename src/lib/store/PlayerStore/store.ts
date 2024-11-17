@@ -1,9 +1,10 @@
 import { get, writable } from "svelte/store";
 
 type Roll = [number, number, number, number];
+type FinishedStoneAmount = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
 export type Player = {
   roll: Roll | null;
-  finished: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
+  finished: FinishedStoneAmount;
 };
 export type Players = {
   activePlayer: "p1" | "p2";
@@ -31,7 +32,8 @@ export const playerStore = writable(initPlayers);
  * */
 export function incrementPlayerScore(player: Players["activePlayer"]) {
   playerStore.update((store) => {
-    ++store.players[player].finished; // increment player score
+    store.players[player].finished = (store.players[player].finished +
+      1) as FinishedStoneAmount; // increment player score
     return store;
   });
 }
@@ -75,7 +77,6 @@ export function getDiceRoll(player: Players["activePlayer"]) {
     (e) => (roll = e.players[player].roll as [number, number, number, number]),
   );
   if (roll !== null) {
-    console.log(roll);
     const result = (roll as [number, number, number, number])?.reduce(
       (acc, value) => acc + value,
       0,
