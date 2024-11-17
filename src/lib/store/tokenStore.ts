@@ -89,16 +89,6 @@ export function moveForward(tokenIndex: number, amount = 0) {
 
   tokensStore.update((tokens) => {
     const token = tokens[tokenIndex];
-    const [_x, _y, z] = token.position;
-
-    // // if from starting shelf (off board -> onto board)
-    // if (Math.abs(z) === START_Z_POSITION) {
-    //   if (amount === 0) return tokens;
-    //   tokens[tokenIndex].position = ProgressionTrack[token.lane][amount - 1];
-    //   return tokens;
-    // }
-
-    // TODO: add star points which give you double turn
 
     // returns current index in the ProgressionTrack
     // with index, can increment forward without worrying about manual positions
@@ -112,7 +102,7 @@ export function moveForward(tokenIndex: number, amount = 0) {
       const newPosition = ProgressionTrack[token.lane][amount - 1];
       const hasCollision = findCollision(tokens, newPosition);
       if (hasCollision) {
-        illegalMove = true;
+        illegalMove = true; // if collision on home row, don't allow move
         return tokens;
       } // if collision on home territory,
       tokens[tokenIndex].position = newPosition;
@@ -126,6 +116,11 @@ export function moveForward(tokenIndex: number, amount = 0) {
 
     // check for collision at new position
     const collisionStone = findCollision(tokens, newPosition);
+
+    if (collisionStone?.lane === token.lane) {
+      illegalMove = true; // if collision with your own stones, illegal move
+      return tokens;
+    }
 
     // if collision stone is on Rosetta, do not move either stone
     // if collision and NOT on Rosseta, move collision_stone to shelf and move forward
