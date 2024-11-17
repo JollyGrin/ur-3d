@@ -1,4 +1,5 @@
 export const rotations = {
+  [0]: 0,
   [45]: Math.PI / 4,
   [90]: Math.PI / 2,
   [180]: Math.PI,
