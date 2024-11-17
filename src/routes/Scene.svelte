@@ -2,12 +2,22 @@
   import Cube from "$lib/components/Cube.svelte";
   import RollTray from "$lib/components/RollTray.svelte";
   import Stones from "$lib/components/Stones.svelte";
+  import Text from "$lib/components/Text.svelte";
+  import { get } from "svelte/store";
   import Camera from "./Camera.svelte";
   import Lights from "./Lights.svelte";
+  import { playerStore } from "$lib/store/PlayerStore/store";
+
+  let players;
+  $: players = $playerStore;
+  console.log({ players });
 </script>
 
 <Lights />
 <Camera />
+
+<Text position={[2.35, 0.1, 1]} text={`${players.players.p1.finished}/7`} />
+<Text position={[2.35, 0.1, -1]} text={`${players.players.p2.finished}/7`} />
 
 <RollTray position={[1, -0.05, -1]} player="p2" />
 <RollTray position={[1, -0.05, 1]} player="p1" />
