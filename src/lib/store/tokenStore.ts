@@ -88,6 +88,7 @@ export function moveForward(tokenIndex: number, amount = 0) {
   let illegalMove = false;
 
   tokensStore.update((tokens) => {
+    if (amount === 0) return tokens;
     const token = tokens[tokenIndex];
 
     // returns current index in the ProgressionTrack
@@ -98,7 +99,6 @@ export function moveForward(tokenIndex: number, amount = 0) {
     );
     // if (progressionIndex === null) return tokens;
     if (progressionIndex === null) {
-      if (amount === 0) return tokens;
       const newPosition = ProgressionTrack[token.lane][amount - 1];
       const hasCollision = findCollision(tokens, newPosition);
       if (hasCollision) {
