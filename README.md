@@ -1,3 +1,7 @@
+
+
+https://github.com/user-attachments/assets/f1ce67df-9d7b-463c-92a6-2462512c0ab9
+
 experimenting with creating github globe
 
 earth textures
